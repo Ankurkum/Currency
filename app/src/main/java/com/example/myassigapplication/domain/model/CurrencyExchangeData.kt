@@ -1,9 +1,0 @@
-package com.example.myassigapplication.domain.model
-
-data class CurrencyExchangeData(
-    val base: String,
-    val date: String,
-    val rates: HashMap<String, Double>,
-    val success: Boolean,
-    val timestamp: Int
-)
