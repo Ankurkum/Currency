@@ -7,8 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.myassigapplication.core.Resource
 import com.example.myassigapplication.domain.model.CurrencyDetailsData
 import com.example.myassigapplication.data.dto.ExchangeItemData
-import com.example.myassigapplication.domain.use_case.GetHistoricalRates
-import com.example.myassigapplication.domain.use_case.GetTopCurrencyRates
+import com.example.myassigapplication.domain.repository.CurrencyCostRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
@@ -18,7 +17,8 @@ import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
-class HistoricalDetailsViewModel @Inject constructor(private val getHistoricalRates: GetHistoricalRates, private val getTopCurrencyRates: GetTopCurrencyRates): ViewModel() {
+class HistoricalDetailsViewModel @Inject constructor(
+    private val currencyCostRepository: CurrencyCostRepository): ViewModel() {
 
     private val _setAdapter = MutableLiveData<ArrayList<ExchangeItemData>>()
     val setAdapter: LiveData<ArrayList<ExchangeItemData>>
@@ -34,10 +34,10 @@ class HistoricalDetailsViewModel @Inject constructor(private val getHistoricalRa
         viewModelScope.launch {
             coroutineScope {
 
-                val call1 = async { getHistoricalRates(LocalDate.now().toString()) }
-                val call2 = async { getHistoricalRates(LocalDate.now().minusDays(1L).toString())}
-                val call3 = async { getHistoricalRates(LocalDate.now().minusDays(2L).toString()) }
-                val call4 = async { getTopCurrencyRates() }
+                val call1 = async { currencyCostRepository.getHistoricalRates(LocalDate.now().toString()) }
+                val call2 = async { currencyCostRepository.getHistoricalRates(LocalDate.now().minusDays(1L).toString())}
+                val call3 = async { currencyCostRepository.getHistoricalRates(LocalDate.now().minusDays(2L).toString()) }
+                val call4 = async { currencyCostRepository.getTopCurrencyRates() }
 
                 val response1 = call1.await()
                 val response2 = call2.await()
@@ -103,7 +103,6 @@ class HistoricalDetailsViewModel @Inject constructor(private val getHistoricalRa
                 }.launchIn(this)
             }
         }
-
     }
 
     private fun setAdapter(itemData: ArrayList<ExchangeItemData>){
