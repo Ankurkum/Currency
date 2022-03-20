@@ -5,22 +5,19 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myassigapplication.core.Resource
-import com.example.myassigapplication.domain.use_case.GetCurrencyExchangeRates
-import com.example.myassigapplication.domain.use_case.GetCurrencySymbols
+import com.example.myassigapplication.domain.repository.CurrencyCostRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 import javax.inject.Inject
 
 @HiltViewModel
 class CurrencyExchangeViewModel @Inject constructor(
-    private val getCurrencyConvertedValue: GetCurrencySymbols,
-    private val getCurrencyExchangeRates: GetCurrencyExchangeRates
+    private val currencyCostRepository: CurrencyCostRepository
 ) : ViewModel() {
 
-    private var currencyCosts: HashMap<String, Double> = HashMap()
+    var currencyCosts: HashMap<String, Double> = HashMap()
     var calculateCostModel: CalculateCost = CalculateCost()
 
     val notifyList = MutableLiveData<Int>()
@@ -36,7 +33,7 @@ class CurrencyExchangeViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            getCurrencyConvertedValue().onEach { result ->
+            currencyCostRepository.getCurrencySymbols().collect { result ->
                 when (result) {
                     is Resource.Success -> {
                         result.data?.symbols?.sort()
@@ -46,11 +43,9 @@ class CurrencyExchangeViewModel @Inject constructor(
 
                     }
                 }
-            }.launchIn(this)
-        }
+            }
 
-        viewModelScope.launch {
-            getCurrencyExchangeRates().onEach { result ->
+            currencyCostRepository.getCurrencyExchangeRates().collect { result ->
                 when (result) {
                     is Resource.Success -> {
                         currencyCosts = result.data?.rates!!
@@ -59,7 +54,7 @@ class CurrencyExchangeViewModel @Inject constructor(
 
                     }
                 }
-            }.launchIn(this)
+            }
         }
     }
 
