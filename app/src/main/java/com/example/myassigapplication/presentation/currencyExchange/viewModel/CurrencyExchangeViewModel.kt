@@ -30,6 +30,13 @@ class CurrencyExchangeViewModel @Inject constructor(
     val baseCurrencyList: LiveData<Array<String>>
         get() = _baseCurrencyList
 
+    private val _navigateToHistoricalScreen = MutableLiveData<Pair<String?, String?>>()
+    val navigateToHistoricalScreen: LiveData<Pair<String?, String?>>
+        get() = _navigateToHistoricalScreen
+
+    private val _showToast = MutableLiveData<String?>()
+    val showToast: LiveData<String?>
+        get() = _showToast
 
     init {
         viewModelScope.launch {
@@ -40,7 +47,7 @@ class CurrencyExchangeViewModel @Inject constructor(
                         _baseCurrencyList.value = result.data?.symbols?.map { it }?.toTypedArray()
                     }
                     is Resource.Error -> {
-
+                        _showToast.value = result.message
                     }
                 }
             }
@@ -49,9 +56,10 @@ class CurrencyExchangeViewModel @Inject constructor(
                 when (result) {
                     is Resource.Success -> {
                         currencyCosts = result.data?.rates!!
+                        calculateCost()
                     }
                     is Resource.Error -> {
-
+                        _showToast.value = result.message
                     }
                 }
             }
@@ -88,6 +96,12 @@ class CurrencyExchangeViewModel @Inject constructor(
         _result.value = exchangeRate?.times(calculateCost.value)
 
     }
+
+    fun navigateToHistoricalScreen() {
+        val pair = Pair(baseCurrencyList.value?.get(calculateCostModel.from), baseCurrencyList.value?.get(calculateCostModel.to))
+        _navigateToHistoricalScreen.value = pair
+    }
+
 
     data class CalculateCost(var from: Int = 0, var to: Int = 0, var value: Double = 1.0)
 

@@ -5,7 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myassigapplication.R
-import com.example.myassigapplication.data.dto.ExchangeItemData
+import com.example.myassigapplication.domain.model.ExchangeItemData
 import kotlinx.android.synthetic.main.item_exchange_rate.view.*
 import kotlinx.android.synthetic.main.item_header.view.*
 
@@ -59,7 +59,6 @@ class ExchangeRatesAdapter(private val mList: ArrayList<ExchangeItemData>) : Rec
                 tvConversionRate.text = currency.currDetailsData.currRate.toString()
             }
         }
-
     }
 
 }

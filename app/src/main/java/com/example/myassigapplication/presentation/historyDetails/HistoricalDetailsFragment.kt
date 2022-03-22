@@ -6,13 +6,18 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.myassigapplication.R
 import com.example.myassigapplication.databinding.HistoricalDetailsFragmentBinding
 import com.example.myassigapplication.domain.model.CurrencyDetailsData
-import com.example.myassigapplication.data.dto.ExchangeItemData
+import com.example.myassigapplication.domain.model.ExchangeItemData
 import com.example.myassigapplication.presentation.currencyExchange.ExchangeRatesAdapter
 import com.example.myassigapplication.presentation.historyDetails.viewModel.HistoricalDetailsViewModel
+import com.example.myassigapplication.utils.Utils
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -21,10 +26,7 @@ class HistoricalDetailsFragment : Fragment() {
     private var _binding: HistoricalDetailsFragmentBinding? = null
     private val binding get() = _binding!!
     private lateinit var viewModel: HistoricalDetailsViewModel
-
-    companion object {
-        fun newInstance() = HistoricalDetailsFragment()
-    }
+    private val args: HistoricalDetailsFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -39,7 +41,16 @@ class HistoricalDetailsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this)[HistoricalDetailsViewModel::class.java]
 
+        viewModel.onViewCreated(args.baseCurrency, args.convertCurrency)
         registerObservers()
+
+        val callback = object: OnBackPressedCallback(true){
+            override fun handleOnBackPressed() {
+                findNavController().navigate(R.id.action_historicalDetailsFragment_to_currencyExchangeFragment23)
+            }
+        }
+
+        requireActivity().onBackPressedDispatcher.addCallback(callback)
     }
 
     private fun registerObservers(){
@@ -48,6 +59,9 @@ class HistoricalDetailsFragment : Fragment() {
         }
         viewModel.setTopCurrRatesRecyclerView.observe(viewLifecycleOwner) {
             setTopCurrRatesRecyclerView(it)
+        }
+        viewModel.showToast.observe(viewLifecycleOwner) {
+            Utils.showToast(context, it)
         }
 
     }

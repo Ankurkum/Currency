@@ -5,18 +5,30 @@ import com.example.myassigapplication.domain.model.CurrencyExchangeData
 import com.example.myassigapplication.domain.model.DomainCurrencySymbolsData
 import com.example.myassigapplication.domain.repository.CurrencyCostRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 
 open class FakeCurrencyRepository: CurrencyCostRepository {
-    override fun getCurrencySymbols(): Flow<Resource<DomainCurrencySymbolsData>> = flow {
+    override fun getCurrencySymbols(): Flow<Resource<DomainCurrencySymbolsData>> {
+        return JsonData.getCurrencySymbolsWithFlow()
     }
 
-    override fun getCurrencyExchangeRates(): Flow<Resource<CurrencyExchangeData>> = flow {
+    override fun getCurrencyExchangeRates(): Flow<Resource<CurrencyExchangeData>> {
+        return JsonData.getCurrExchangeRatesWithFlow()
     }
 
-    override fun getHistoricalRates(date: String): Flow<Resource<CurrencyExchangeData>> = flow {
+    override fun getHistoricalRates(
+        date: String,
+        baseCurrency: String,
+        convertCurrency: String
+    ): Flow<Resource<CurrencyExchangeData>> {
+        return JsonData.getExchangeRatesWithFlow()
     }
 
-    override fun getTopCurrencyRates(): Flow<Resource<CurrencyExchangeData>> = flow {
+    override fun getTopCurrencyRates(
+        date: String,
+        baseCurrency: String,
+        convertCurrency: String
+    ): Flow<Resource<CurrencyExchangeData>> {
+        return JsonData.getExchangeRatesWithFlow()
     }
+
 }

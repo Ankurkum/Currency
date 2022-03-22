@@ -229,11 +229,6 @@ class JsonData {
             val currencyExchangeRates = gson.fromJson(getHistoricalRates(), CurrencyExchangeRates::class.java)
             emit(Resource.Success(currencyExchangeRates.toCurrencyExchange()))
         }
-        fun getExchangeRates(): CurrencyExchangeData {
-            val gson = Gson()
-            val currencyExchangeRates = gson.fromJson(getHistoricalRates(), CurrencyExchangeRates::class.java)
-            return currencyExchangeRates.toCurrencyExchange()
-        }
 
         fun getCurrencySymbolsWithFlow(): Flow<Resource<DomainCurrencySymbolsData>> = flow {
             val gson = Gson()
@@ -241,10 +236,10 @@ class JsonData {
             emit(Resource.Success(currencyExchangeRates.toCurrencySymbols()))
         }
 
-        fun getCurrencySymbols(): DomainCurrencySymbolsData {
+        fun getCurrExchangeRatesWithFlow(): Flow<Resource<CurrencyExchangeData>> = flow {
             val gson = Gson()
-            val currencyExchangeRates = gson.fromJson(getCurrencyData(), CurrencySymbols::class.java)
-            return currencyExchangeRates.toCurrencySymbols()
+            val currencyExchangeRates = gson.fromJson(getCurrencyExchangeRates(), CurrencyExchangeRates::class.java)
+            emit(Resource.Success(currencyExchangeRates.toCurrencyExchange()))
         }
     }
 }
