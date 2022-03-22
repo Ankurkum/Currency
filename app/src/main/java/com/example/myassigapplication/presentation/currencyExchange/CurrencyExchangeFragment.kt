@@ -10,10 +10,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import androidx.navigation.fragment.findNavController
+import com.example.myassigapplication.R
 import com.example.myassigapplication.databinding.CurrencyExchangeFragmentBinding
 import com.example.myassigapplication.presentation.currencyExchange.viewModel.CurrencyExchangeViewModel
-import com.example.myassigapplication.presentation.historyDetails.HistoricalDetailsFragment
-import com.example.myassigapplication.presentation.MainActivity
+import com.example.myassigapplication.utils.Utils
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -36,7 +37,7 @@ class CurrencyExchangeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this)[CurrencyExchangeViewModel::class.java]
 
-        binding.input.addTextChangedListener(object : TextWatcher{
+        binding.input.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
             }
 
@@ -44,7 +45,7 @@ class CurrencyExchangeFragment : Fragment() {
             }
 
             override fun afterTextChanged(s: Editable?) {
-                if(s?.isNotEmpty() == true) {
+                if (s?.isNotEmpty() == true) {
                     viewModel.calculateCostModel.value = s.toString().toDouble()
                     viewModel.calculateCost()
                 }
@@ -52,12 +53,11 @@ class CurrencyExchangeFragment : Fragment() {
 
         })
 
-
         registerObservers()
         setListeners()
     }
 
-    private fun registerObservers(){
+    private fun registerObservers() {
         viewModel.baseCurrencyList.observe(viewLifecycleOwner) {
             setFromAdapter(it)
             setToAdapter(it)
@@ -71,23 +71,33 @@ class CurrencyExchangeFragment : Fragment() {
             binding.from.setSelection(viewModel.calculateCostModel.from)
             binding.to.setSelection(viewModel.calculateCostModel.to)
         }
+        viewModel.navigateToHistoricalScreen.observe(viewLifecycleOwner) {
+            it.second?.let { it2 ->
+                findNavController().navigate(
+                    CurrencyExchangeFragmentDirections.actionCurrencyExchangeFragment2ToHistoricalDetailsFragment(
+                        resources.getString(R.string.eur), it2))
+            }
+        }
+        viewModel.showToast.observe(viewLifecycleOwner) {
+            Utils.showToast(context, it)
+        }
     }
 
-    private fun setFromAdapter(items: Array<String>){
+    private fun setFromAdapter(items: Array<String>) {
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, items)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.from.adapter = adapter
         binding.from.setSelection(47)
     }
 
-    private fun setToAdapter(items: Array<String>){
+    private fun setToAdapter(items: Array<String>) {
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, items)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.to.adapter = adapter
     }
 
-    private fun setListeners(){
-        binding.from.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+    private fun setListeners() {
+        binding.from.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, id: Long) {
                 viewModel.calculateCostModel.from = position
                 viewModel.calculateCost()
@@ -97,7 +107,7 @@ class CurrencyExchangeFragment : Fragment() {
             }
         }
 
-        binding.to.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+        binding.to.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(p0: AdapterView<*>?, p1: View?, position: Int, id: Long) {
                 viewModel.calculateCostModel.to = position
                 viewModel.calculateCost()
@@ -112,12 +122,8 @@ class CurrencyExchangeFragment : Fragment() {
         }
 
         binding.btnDetails.setOnClickListener {
-            (activity as MainActivity).addFragmentToActivity(HistoricalDetailsFragment.newInstance())
+            viewModel.navigateToHistoricalScreen()
         }
-    }
-
-    companion object {
-        fun newInstance() = CurrencyExchangeFragment()
     }
 
 }

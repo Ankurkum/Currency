@@ -5,8 +5,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myassigapplication.core.Resource
+import com.example.myassigapplication.utils.Constants
 import com.example.myassigapplication.domain.model.CurrencyDetailsData
-import com.example.myassigapplication.data.dto.ExchangeItemData
+import com.example.myassigapplication.domain.model.ExchangeItemData
 import com.example.myassigapplication.domain.repository.CurrencyCostRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
@@ -18,7 +19,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HistoricalDetailsViewModel @Inject constructor(
-    private val currencyCostRepository: CurrencyCostRepository): ViewModel() {
+    private val currencyCostRepository: CurrencyCostRepository
+) : ViewModel() {
 
     private val _setAdapter = MutableLiveData<ArrayList<ExchangeItemData>>()
     val setAdapter: LiveData<ArrayList<ExchangeItemData>>
@@ -28,60 +30,105 @@ class HistoricalDetailsViewModel @Inject constructor(
     val setTopCurrRatesRecyclerView: LiveData<ArrayList<CurrencyDetailsData>>
         get() = _setTopCurrRatesRecyclerView
 
-    init {
+    private val _showToast = MutableLiveData<String?>()
+    val showToast: LiveData<String?>
+        get() = _showToast
+
+    private fun setAdapter(itemData: ArrayList<ExchangeItemData>) {
+        _setAdapter.value = itemData
+    }
+
+    private fun setTopCurrRatesRecyclerView(items: ArrayList<CurrencyDetailsData>) {
+        _setTopCurrRatesRecyclerView.value = items
+    }
+
+    fun onViewCreated(baseCurrency: String, convertCurrency: String) {
         val items = ArrayList<ExchangeItemData>()
         val topCurrItems = ArrayList<CurrencyDetailsData>()
         viewModelScope.launch {
             coroutineScope {
 
-                val call1 = async { currencyCostRepository.getHistoricalRates(LocalDate.now().toString()) }
-                val call2 = async { currencyCostRepository.getHistoricalRates(LocalDate.now().minusDays(1L).toString())}
-                val call3 = async { currencyCostRepository.getHistoricalRates(LocalDate.now().minusDays(2L).toString()) }
-                val call4 = async { currencyCostRepository.getTopCurrencyRates() }
+                val call1 = async {
+                    currencyCostRepository.getHistoricalRates(LocalDate.now().minusDays(1L).toString(), baseCurrency, convertCurrency)
+                }
+                val call2 = async {
+                    currencyCostRepository.getHistoricalRates(LocalDate.now().minusDays(2L).toString(), baseCurrency, convertCurrency)
+                }
+                val call3 = async {
+                    currencyCostRepository.getHistoricalRates(LocalDate.now().minusDays(3L).toString(), baseCurrency, convertCurrency)
+                }
+                val call4 = async {
+                    currencyCostRepository.getTopCurrencyRates(LocalDate.now().minusDays(1L).toString(), baseCurrency,
+                        Constants.TOP_CURRENCIES.joinToString())
+                }
 
                 val response1 = call1.await()
                 val response2 = call2.await()
                 val response3 = call3.await()
                 val response4 = call4.await()
 
-                response1.onEach {
-                    when(it) {
+               response1.onEach {
+                    when (it) {
                         is Resource.Success -> {
                             items.add(ExchangeItemData(0, date = it.data!!.date))
-                            for(set:Map.Entry<String, Double> in it.data.rates) {
-                                items.add(ExchangeItemData(1, CurrencyDetailsData(currName = set.key, currRate = set.value)))
+                            for (set: Map.Entry<String, Double> in it.data.rates) {
+                                items.add(
+                                    ExchangeItemData(
+                                        1,
+                                        CurrencyDetailsData(
+                                            currName = set.key,
+                                            currRate = set.value
+                                        )
+                                    )
+                                )
                             }
                         }
                         is Resource.Error -> {
+                            _showToast.value = it.message
                         }
                     }
                 }.launchIn(this)
 
                 response2.onEach {
-                    when(it) {
+                    when (it) {
                         is Resource.Success -> {
                             items.add(ExchangeItemData(0, date = it.data!!.date))
-                            for(set:Map.Entry<String, Double> in it.data.rates) {
-                                items.add(ExchangeItemData(1,CurrencyDetailsData(currName = set.key, currRate = set.value)))
+                            for (set: Map.Entry<String, Double> in it.data.rates) {
+                                items.add(
+                                    ExchangeItemData(
+                                        1,
+                                        CurrencyDetailsData(
+                                            currName = set.key,
+                                            currRate = set.value
+                                        )
+                                    )
+                                )
                             }
                         }
-                        is Resource.Error -> {
+                        is Resource.Error -> { _showToast.value = it.message
                         }
                     }
                 }.launchIn(this)
 
                 response3.onEach {
-                    when(it) {
+                    when (it) {
                         is Resource.Success -> {
                             items.add(ExchangeItemData(0, date = it.data!!.date))
-                            for(set:Map.Entry<String, Double> in it.data.rates) {
-                                items.add(ExchangeItemData(1,CurrencyDetailsData(currName = set.key, currRate = set.value)))
+                            for (set: Map.Entry<String, Double> in it.data.rates) {
+                                items.add(
+                                    ExchangeItemData(1,
+                                        CurrencyDetailsData(
+                                            currName = set.key,
+                                            currRate = set.value
+                                        )
+                                    )
+                                )
                             }
-                            withContext(Dispatchers.Main){
+                            withContext(Dispatchers.Main) {
                                 setAdapter(items)
                             }
                         }
-                        is Resource.Error -> {
+                        is Resource.Error -> { _showToast.value = it.message
                         }
                     }
                 }.launchIn(this)
@@ -90,14 +137,19 @@ class HistoricalDetailsViewModel @Inject constructor(
                     when (it) {
                         is Resource.Success -> {
                             for (set: Map.Entry<String, Double> in it.data!!.rates) {
-                                topCurrItems.add(CurrencyDetailsData(currName = set.key, currRate = set.value))
+                                topCurrItems.add(
+                                    CurrencyDetailsData(
+                                        currName = set.key,
+                                        currRate = set.value
+                                    )
+                                )
                             }
-                            withContext(Dispatchers.Main){
+                            withContext(Dispatchers.Main) {
                                 setTopCurrRatesRecyclerView(topCurrItems)
                             }
 
                         }
-                        is Resource.Error -> {
+                        is Resource.Error -> { _showToast.value = it.message
                         }
                     }
                 }.launchIn(this)
@@ -105,11 +157,4 @@ class HistoricalDetailsViewModel @Inject constructor(
         }
     }
 
-    private fun setAdapter(itemData: ArrayList<ExchangeItemData>){
-        _setAdapter.value = itemData
-    }
-
-    private fun setTopCurrRatesRecyclerView(items: ArrayList<CurrencyDetailsData>){
-        _setTopCurrRatesRecyclerView.value = items
-    }
 }

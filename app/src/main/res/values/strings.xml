@@ -1,3 +1,31 @@
 <resources>
     <string name="app_name">My Assig Application</string>
+
+    <string name="no_response">No Response</string>
+    <string name="one">1</string>
+
+    <string name="eur">EUR</string>
+    <string name="aud">AUD</string>
+    <string name="cad">CAD</string>
+    <string name="pln">PLN</string>
+    <string name="mxn">MXN</string>
+    <string name="aed">AED</string>
+    <string name="afn">AFN</string>
+    <string name="bmd">BMD</string>
+    <string name="clp">CLP</string>
+    <string name="cny">CNY</string>
+    <string name="inr">INR</string>
+
+    <string-array name="top_currencies">
+        <item>@string/aud</item>
+        <item>@string/cad</item>
+        <item>@string/pln</item>
+        <item>@string/mxn</item>
+        <item>@string/aed</item>
+        <item>@string/afn</item>
+        <item>@string/bmd</item>
+        <item>@string/clp</item>
+        <item>@string/cny</item>
+        <item>@string/inr</item>
+    </string-array>
 </resources>

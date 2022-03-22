@@ -8,6 +8,6 @@ import kotlinx.coroutines.flow.Flow
 interface CurrencyCostRepository {
     fun getCurrencySymbols(): Flow<Resource<DomainCurrencySymbolsData>>
     fun getCurrencyExchangeRates(): Flow<Resource<CurrencyExchangeData>>
-    fun getHistoricalRates(date: String): Flow<Resource<CurrencyExchangeData>>
-    fun getTopCurrencyRates(): Flow<Resource<CurrencyExchangeData>>
+    fun getHistoricalRates(date: String, baseCurrency: String, convertCurrency: String): Flow<Resource<CurrencyExchangeData>>
+    fun getTopCurrencyRates(date: String, baseCurrency: String, convertCurrency: String): Flow<Resource<CurrencyExchangeData>>
 }
